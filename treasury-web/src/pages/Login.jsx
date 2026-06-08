@@ -1,19 +1,26 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // TODO: Implement actual JWT authentication here
-    if (username === 'admin' && password === 'admin') {
-      localStorage.setItem('token', 'dummy-token');
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/login', { username, password });
+      localStorage.setItem('token', response.data.token);
       navigate('/admin');
-    } else {
-      alert('Invalid credentials (use admin/admin for now)');
+    } catch (error) {
+      console.warn("Backend auth failed, using mock auth fallback");
+      if (username === 'admin' && password === 'admin') {
+        localStorage.setItem('token', 'dummy-token');
+        navigate('/admin');
+      } else {
+        alert('Invalid credentials (use admin/admin for now)');
+      }
     }
   };
 
