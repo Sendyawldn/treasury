@@ -248,7 +248,23 @@ const Admin = () => {
                   </div>
                   <div>
                     <label className="block text-sm mb-1 text-muted">Jabatan / Role</label>
-                    <input type="text" className="input-field w-full" value={memRole} onChange={(e) => setMemRole(e.target.value)} />
+                    <input 
+                      list="role-options" 
+                      className="input-field w-full" 
+                      value={memRole} 
+                      onChange={(e) => setMemRole(e.target.value)} 
+                      placeholder="Pilih atau ketik baru..."
+                      required
+                    />
+                    <datalist id="role-options">
+                      {/* Gabungkan role standar dengan role unik yang sudah ada di data */}
+                      {Array.from(new Set([
+                        'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Anggota',
+                        ...members.map(m => m.role).filter(Boolean)
+                      ])).map(r => (
+                        <option key={r} value={r} />
+                      ))}
+                    </datalist>
                   </div>
                   <div>
                     <label className="block text-sm mb-1 text-muted">No. Telepon</label>
