@@ -1,93 +1,205 @@
 import { useEffect } from 'react';
 import useStore from '../store/useStore';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
+import { fmtRupiah, fmtShort, fmtTanggal } from '../utils/format';
+
+const C = {
+  terkumpul: '#6c63ff',
+  konsumsi:  '#f87171',
+  saldo:     '#38bdf8',
+  grid:      'rgba(255,255,255,0.06)',
+  tick:      '#64748b',
+};
 
 const Dashboard = () => {
-  const { transactions, targetDana, fetchDashboardData } = useStore();
+  const { transactions, targetDana, fetchDashboardData, isLoading } = useStore();
 
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  const totalTerkumpul = transactions.reduce((acc, curr) => acc + curr.terkumpul, 0);
-  const totalPengeluaran = transactions.reduce((acc, curr) => acc + curr.konsumsi, 0);
-  const saldoBersih = totalTerkumpul - totalPengeluaran;
-  const progressPercent = Math.min((totalTerkumpul / targetDana) * 100, 100).toFixed(1);
+  const totalTerkumpul = transactions.reduce((s, t) => s + t.terkumpul, 0);
+  const totalKonsumsi  = transactions.reduce((s, t) => s + t.konsumsi, 0);
+  const saldoAkhir     = totalTerkumpul - totalKonsumsi;
+  const rataRata       = transactions.length ? Math.round(totalTerkumpul / transactions.length) : 0;
+  const pct = targetDana > 0 ? Math.min(100, (totalTerkumpul / targetDana) * 100) : 0;
 
-  // Prepare chart data
-  let cumulative = 0;
-  const chartData = transactions.map(t => {
-    cumulative += t.terkumpul;
-    return { date: t.date, total: cumulative };
-  });
+  // Data for Bar Chart
+  const barData = transactions.map(t => ({
+    date: fmtTanggal(t.date),
+    terkumpul: t.terkumpul,
+    konsumsi: t.konsumsi,
+  }));
+
+  // Data for Line Chart
+  const lineData = transactions.reduce((acc, t) => {
+    const lastKum = acc.length > 0 ? acc[acc.length - 1].saldo : 0;
+    const currentKum = lastKum + (t.terkumpul - t.konsumsi);
+    acc.push({ date: fmtTanggal(t.date), saldo: currentKum });
+    return acc;
+  }, []);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
-      <header className="flex justify-between items-center mb-8">
+    <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+      <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-            Dashboard 17 Agustusan
+          <h1 className="text-3xl font-semibold text-text flex items-center gap-2">
+            <span className="w-8 h-8 rounded-lg bg-accent text-white flex items-center justify-center font-bold text-lg">P</span>
+            Pemuda Pemudi Cihuyy
           </h1>
-          <p className="text-text-muted mt-1">Transparansi Keuangan Warga Cihuyy</p>
+          <p className="text-muted mt-1">Dana 17 Agustusan 2025</p>
         </div>
-        <Link to="/login" className="btn-primary">
-          Login Admin
-        </Link>
+        <div className="flex gap-3">
+          <Link to="/" className="btn-primary bg-bg-raised text-text border border-border-md hover:bg-bg-hover">
+            Dashboard
+          </Link>
+          <Link to="/login" className="btn-primary">
+            Admin
+          </Link>
+        </div>
       </header>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass-panel p-6">
-          <h3 className="text-text-muted text-sm uppercase tracking-wider">Total Terkumpul</h3>
-          <p className="text-4xl font-bold text-accent mt-2">Rp {totalTerkumpul.toLocaleString()}</p>
-        </div>
-        <div className="glass-panel p-6">
-          <h3 className="text-text-muted text-sm uppercase tracking-wider">Total Pengeluaran</h3>
-          <p className="text-4xl font-bold text-primary mt-2">Rp {totalPengeluaran.toLocaleString()}</p>
-        </div>
-        <div className="glass-panel p-6 border-t-4 border-info">
-          <h3 className="text-text-muted text-sm uppercase tracking-wider">Saldo Bersih</h3>
-          <p className="text-4xl font-bold text-white mt-2">Rp {saldoBersih.toLocaleString()}</p>
-        </div>
-      </div>
+      {isLoading && <p className="text-muted">Memuat data...</p>}
 
-      {/* Target Progress */}
-      <div className="glass-panel p-6">
-        <div className="flex justify-between items-end mb-2">
-          <h3 className="text-xl font-medium">Target Dana (Rp {targetDana.toLocaleString()})</h3>
-          <span className="text-accent font-bold text-xl">{progressPercent}%</span>
-        </div>
-        <div className="w-full bg-surface-hover rounded-full h-4 overflow-hidden">
-          <div 
-            className="bg-gradient-to-r from-primary to-accent h-4 rounded-full transition-all duration-1000" 
-            style={{ width: `${progressPercent}%` }}
-          ></div>
-        </div>
-      </div>
+      {!isLoading && (
+        <>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="glass-panel p-6 border-t-2" style={{ borderTopColor: C.terkumpul }}>
+              <h3 className="text-muted text-sm tracking-wide">Terkumpul</h3>
+              <p className="text-3xl font-medium text-text mt-2">{fmtRupiah(totalTerkumpul)}</p>
+            </div>
+            <div className="glass-panel p-6 border-t-2" style={{ borderTopColor: C.konsumsi }}>
+              <h3 className="text-muted text-sm tracking-wide">Konsumsi</h3>
+              <p className="text-3xl font-medium text-text mt-2">{fmtRupiah(totalKonsumsi)}</p>
+            </div>
+            <div className="glass-panel p-6 border-t-2" style={{ borderTopColor: C.saldo }}>
+              <h3 className="text-muted text-sm tracking-wide">Saldo Akhir</h3>
+              <p className="text-3xl font-medium text-text mt-2">{fmtRupiah(saldoAkhir)}</p>
+            </div>
+            <div className="glass-panel p-6 border-t-2 border-border-md">
+              <h3 className="text-muted text-sm tracking-wide">Rata-rata / Hari</h3>
+              <p className="text-3xl font-medium text-text mt-2">{fmtRupiah(rataRata)}</p>
+            </div>
+          </div>
 
-      {/* Chart */}
-      <div className="glass-panel p-6 h-[400px]">
-        <h3 className="text-xl font-medium mb-6">Grafik Pemasukan Dana</h3>
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-            <XAxis dataKey="date" stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" />
-            <Tooltip 
-              contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
-              itemStyle={{ color: '#f8fafc' }}
-            />
-            <Area type="monotone" dataKey="total" stroke="var(--color-primary)" fillOpacity={1} fill="url(#colorTotal)" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+          {/* Target Progress */}
+          <div className="glass-panel p-6">
+            <div className="flex justify-between items-end mb-3">
+              <h3 className="text-lg font-medium text-text">Progress Pencapaian Anggaran</h3>
+              <span className="text-warning font-semibold text-lg">{pct.toFixed(1)}%</span>
+            </div>
+            <div className="w-full bg-bg-hover rounded-full h-3 overflow-hidden">
+              <div 
+                className="bg-warning h-3 rounded-full transition-all duration-1000 ease-out" 
+                style={{ width: `${pct}%` }}
+              ></div>
+            </div>
+            <p className="text-sm text-muted mt-2">Target: {fmtRupiah(targetDana)}</p>
+          </div>
+
+          {/* Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Bar Chart */}
+            <div className="glass-panel p-6 h-[400px] flex flex-col">
+              <h3 className="text-lg font-medium text-text mb-4">Terkumpul vs Konsumsi</h3>
+              <div className="flex-1 min-h-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={barData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
+                    <XAxis dataKey="date" stroke={C.tick} tick={{ fill: C.tick, fontSize: 12 }} />
+                    <YAxis stroke={C.tick} tickFormatter={fmtShort} tick={{ fill: C.tick, fontSize: 12 }} />
+                    <RechartsTooltip 
+                      contentStyle={{ backgroundColor: '#1a1e28', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                      itemStyle={{ color: '#f1f5f9' }}
+                      formatter={(val) => fmtRupiah(val)}
+                    />
+                    <Bar dataKey="terkumpul" fill="#6c63ff88" stroke={C.terkumpul} strokeWidth={1} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="konsumsi" fill="#f8717144" stroke={C.konsumsi} strokeWidth={1} radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Line Chart */}
+            <div className="glass-panel p-6 h-[400px] flex flex-col">
+              <h3 className="text-lg font-medium text-text mb-4">Saldo Kumulatif</h3>
+              <div className="flex-1 min-h-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={lineData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorSaldo" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={C.saldo} stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor={C.saldo} stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
+                    <XAxis dataKey="date" stroke={C.tick} tick={{ fill: C.tick, fontSize: 12 }} />
+                    <YAxis stroke={C.tick} tickFormatter={fmtShort} tick={{ fill: C.tick, fontSize: 12 }} />
+                    <RechartsTooltip 
+                      contentStyle={{ backgroundColor: '#1a1e28', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                      itemStyle={{ color: '#f1f5f9' }}
+                      formatter={(val) => fmtRupiah(val)}
+                    />
+                    <Area type="monotone" dataKey="saldo" stroke={C.saldo} strokeWidth={2} fillOpacity={1} fill="url(#colorSaldo)" activeDot={{ r: 6 }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* Transactions Table */}
+          <div className="glass-panel p-0 overflow-hidden">
+            <div className="p-6 border-b border-border">
+              <h3 className="text-lg font-medium text-text">Rincian Per Hari</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-bg-hover text-muted text-sm">
+                    <th className="p-4 font-medium">Tanggal</th>
+                    <th className="p-4 font-medium">Terkumpul</th>
+                    <th className="p-4 font-medium">Konsumsi</th>
+                    <th className="p-4 font-medium">Saldo Hari Ini</th>
+                    <th className="p-4 font-medium">Kumulatif</th>
+                    <th className="p-4 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="text-text divide-y divide-border">
+                  {(() => {
+                    let k = 0;
+                    return transactions.map((t, i) => {
+                      const sHariIni = t.terkumpul - t.konsumsi;
+                      k += sHariIni;
+                      const isSurplus = sHariIni >= 0;
+                      return (
+                        <tr key={t.id || i} className="hover:bg-bg-raised transition-colors">
+                          <td className="p-4 whitespace-nowrap">{fmtTanggal(t.date)}</td>
+                          <td className="p-4 whitespace-nowrap">{fmtRupiah(t.terkumpul)}</td>
+                          <td className="p-4 whitespace-nowrap">{fmtRupiah(t.konsumsi)}</td>
+                          <td className="p-4 whitespace-nowrap font-medium">{fmtRupiah(sHariIni)}</td>
+                          <td className="p-4 whitespace-nowrap text-accent-3">{fmtRupiah(k)}</td>
+                          <td className="p-4 whitespace-nowrap">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${isSurplus ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger'}`}>
+                              {isSurplus ? 'Surplus' : 'Minus'}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()}
+                  {transactions.length === 0 && (
+                    <tr>
+                      <td colSpan="6" className="p-6 text-center text-muted">Belum ada data penarikan.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

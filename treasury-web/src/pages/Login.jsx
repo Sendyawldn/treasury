@@ -13,7 +13,7 @@ const Login = () => {
       const response = await axios.post('http://localhost:5000/api/auth/login', { username, password });
       localStorage.setItem('token', response.data.token);
       navigate('/admin');
-    } catch (error) {
+    } catch {
       console.warn("Backend auth failed, using mock auth fallback");
       if (username === 'admin' && password === 'admin') {
         localStorage.setItem('token', 'dummy-token');
@@ -25,42 +25,51 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden animate-in fade-in duration-500">
       {/* Background decorations */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[100px]"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/20 rounded-full blur-[100px]"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/20 rounded-full blur-[100px]"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-3/10 rounded-full blur-[100px]"></div>
 
-      <div className="glass-panel p-8 w-full max-w-md relative z-10">
+      <div className="glass-panel p-8 w-full max-w-md relative z-10 border-t-2 border-accent">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-2">Admin Login</h2>
-          <p className="text-text-muted">Sistem Keuangan Cihuyy</p>
+          <div className="w-16 h-16 rounded-xl bg-accent text-white flex items-center justify-center font-bold text-3xl mx-auto mb-4 shadow-lg shadow-accent/20">
+            P
+          </div>
+          <h2 className="text-2xl font-semibold mb-2 text-text">Admin Login</h2>
+          <p className="text-muted">Sistem Keuangan Cihuyy</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2 text-text-muted">Username</label>
+            <label className="block text-sm font-medium mb-2 text-muted">Username</label>
             <input 
               type="text" 
-              className="input-field w-full" 
+              className="input-field w-full bg-bg-base" 
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Masukkan username"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 text-text-muted">Password</label>
+            <label className="block text-sm font-medium mb-2 text-muted">Password</label>
             <input 
               type="password" 
-              className="input-field w-full"
+              className="input-field w-full bg-bg-base"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
             />
           </div>
-          <button type="submit" className="btn-primary w-full py-3 mt-4 text-lg">
+          <button type="submit" className="btn-primary w-full py-3 mt-4 text-base font-semibold shadow-lg shadow-accent/20">
             Masuk ke Panel Admin
           </button>
         </form>
+        
+        <div className="mt-6 text-center">
+          <button onClick={() => navigate('/')} className="text-muted hover:text-text text-sm transition-colors">
+            &larr; Kembali ke Dashboard Warga
+          </button>
+        </div>
       </div>
     </div>
   );

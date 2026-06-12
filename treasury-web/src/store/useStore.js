@@ -2,46 +2,61 @@ import { create } from 'zustand';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api';
+const authHeader = () => ({
+  headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+});
 
-const useStore = create((set) => ({
-  members: [],
+const MOCK_TX = [
+  { id: 1, date: '2026-06-07T00:00:00.000Z', terkumpul: 850000, konsumsi: 0, notes: 'Hari pertama' },
+];
+
+const useStore = create((set, get) => ({
   transactions: [],
-  budgetItems: [],
-  targetDana: 15000000,
-  
-  setMembers: (members) => set({ members }),
-  setTransactions: (transactions) => set({ transactions }),
-  setBudgetItems: (budgetItems) => set({ budgetItems }),
-  
+  budgetItems:  [],
+  members:      [],
+  targetDana:   12790000,
+  isLoading:    false,
+
   fetchDashboardData: async () => {
+    set({ isLoading: true });
     try {
-      const [membersRes, transactionsRes, budgetItemsRes] = await Promise.all([
-        axios.get(`${API_URL}/members`),
+      const [txRes, bgRes, mbRes] = await Promise.all([
         axios.get(`${API_URL}/transactions`),
-        axios.get(`${API_URL}/budgets`)
+        axios.get(`${API_URL}/budgets`),
+        axios.get(`${API_URL}/members`),
       ]);
-      set({
-        members: membersRes.data,
-        transactions: transactionsRes.data,
-        budgetItems: budgetItemsRes.data
-      });
-    } catch (error) {
-      console.warn("Backend unavailable, using mock data for dashboard");
-      set({
-        members: [
-          { id: 1, name: 'Budi', role: 'Ketua', avatarColor: 'bg-red-500' },
-          { id: 2, name: 'Siti', role: 'Bendahara', avatarColor: 'bg-blue-500' }
-        ],
-        transactions: [
-          { id: 1, date: '2023-08-01', terkumpul: 1000000, konsumsi: 50000 },
-          { id: 2, date: '2023-08-02', terkumpul: 1500000, konsumsi: 0 }
-        ],
-        budgetItems: [
-          { id: 1, name: 'Panggung', category: 'Dekorasi', price: 5000000 }
-        ]
-      });
+      const sorted = txRes.data.sort((a, b) => new Date(a.date) - new Date(b.date));
+      set({ transactions: sorted, budgetItems: bgRes.data, members: mbRes.data });
+    } catch {
+      set({ transactions: MOCK_TX });
+    } finally {
+      set({ isLoading: false });
     }
-  }
+  },
+
+  addTransaction: async (data) => {
+    const res = await axios.post(`${API_URL}/transactions`, data, authHeader());
+    const sorted = [...get().transactions, res.data]
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+    set({ transactions: sorted });
+  },
+
+  deleteTransaction: async (id) => {
+    await axios.delete(`${API_URL}/transactions/${id}`, authHeader());
+    set({ transactions: get().transactions.filter(t => t.id !== id) });
+  },
+
+  addBudgetItem: async (data) => {
+    const res = await axios.post(`${API_URL}/budgets`, data, authHeader());
+    set({ budgetItems: [...get().budgetItems, res.data] });
+  },
+
+  deleteBudgetItem: async (id) => {
+    await axios.delete(`${API_URL}/budgets/${id}`, authHeader());
+    set({ budgetItems: get().budgetItems.filter(b => b.id !== id) });
+  },
+
+  setTargetDana: (val) => set({ targetDana: val }),
 }));
 
 export default useStore;

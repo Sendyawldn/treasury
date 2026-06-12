@@ -1,42 +1,40 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #e63946;
-  --color-primary-dark: #d62828;
-  --color-secondary: #f1faee;
-  --color-accent: #a8dadc;
-  --color-info: #457b9d;
-  --color-dark: #1d3557;
-
-  --color-background: #0f172a;
-  --color-surface: #1e293b;
-  --color-surface-hover: #334155;
-  --color-text: #f8fafc;
-  --color-text-muted: #94a3b8;
+  --color-bg-base:    #0d0f14;
+  --color-bg-surface: #13161e;
+  --color-bg-raised:  #1a1e28;
+  --color-bg-hover:   #21273a;
+  --color-accent:     #6c63ff;
+  --color-accent-2:   #a78bfa;
+  --color-accent-3:   #38bdf8;
+  --color-success:    #34d399;
+  --color-danger:     #f87171;
+  --color-warning:    #fbbf24;
+  --color-text:       #f1f5f9;
+  --color-muted:      #94a3b8;
+  --color-faint:      #4b5563;
+  --color-border:     rgba(255,255,255,0.07);
+  --color-border-md:  rgba(255,255,255,0.13);
 }
 
 @layer base {
   body {
-    @apply bg-background text-text font-sans antialiased;
-    background-image: radial-gradient(
-      circle at top right,
-      #1e293b 0%,
-      #0f172a 100%
-    );
+    @apply bg-bg-base text-text font-sans antialiased;
     min-height: 100vh;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-surface/80 backdrop-blur-md border border-surface-hover rounded-2xl shadow-xl;
+    @apply bg-bg-surface border border-border rounded-xl;
   }
   
   .btn-primary {
-    @apply bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-primary/30 active:scale-95;
+    @apply bg-accent hover:bg-accent-2 text-white font-medium py-2 px-4 rounded-lg transition-all active:scale-95;
   }
   
   .input-field {
-    @apply bg-slate-800 border border-slate-700 text-white rounded-xl py-2 px-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all;
+    @apply bg-bg-raised border border-border-md text-text rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all;
   }
 }
