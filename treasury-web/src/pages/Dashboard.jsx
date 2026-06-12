@@ -51,8 +51,8 @@ const Dashboard = () => {
           <p className="text-muted mt-1">Dana 17 Agustusan 2025</p>
         </div>
         <div className="flex gap-3">
-          <Link to="/" className="btn-primary bg-bg-raised text-text border border-border-md hover:bg-bg-hover">
-            Dashboard
+          <Link to="/panitia" className="btn-primary bg-bg-raised text-text border border-border-md hover:bg-bg-hover">
+            Struktur Panitia
           </Link>
           <Link to="/login" className="btn-primary">
             Admin

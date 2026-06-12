@@ -56,6 +56,16 @@ const useStore = create((set, get) => ({
     set({ budgetItems: get().budgetItems.filter(b => b.id !== id) });
   },
 
+  addMember: async (data) => {
+    const res = await axios.post(`${API_URL}/members`, data, authHeader());
+    set({ members: [...get().members, res.data] });
+  },
+
+  deleteMember: async (id) => {
+    await axios.delete(`${API_URL}/members/${id}`, authHeader());
+    set({ members: get().members.filter(m => m.id !== id) });
+  },
+
   setTargetDana: (val) => set({ targetDana: val }),
 }));
 
