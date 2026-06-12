@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import useStore from '../store/useStore';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { fmtRupiah, fmtShort, fmtTanggal } from '../utils/format';
 
@@ -50,12 +51,12 @@ const Dashboard = () => {
           </h1>
           <p className="text-muted mt-1">Dana 17 Agustusan 2025</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           <Link to="/panitia" className="btn-primary bg-bg-raised text-text border border-border-md hover:bg-bg-hover">
             Struktur Panitia
           </Link>
-          <Link to="/login" className="btn-primary">
-            Admin
+          <Link to="/login" className="text-muted hover:text-accent p-2 rounded-lg transition-colors" title="Panel Akses">
+            <Lock size={18} />
           </Link>
         </div>
       </header>
