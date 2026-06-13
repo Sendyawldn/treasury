@@ -14,8 +14,24 @@ const useStore = create((set, get) => ({
   transactions: [],
   budgetItems:  [],
   members:      [],
+  customRoles:  JSON.parse(localStorage.getItem('customRoles') || '["Ketua", "Wakil Ketua", "Sekretaris", "Bendahara", "Anggota"]'),
   targetDana:   12790000,
   isLoading:    false,
+
+  addCustomRole: (role) => {
+    const { customRoles } = get();
+    if (!customRoles.includes(role)) {
+      const newRoles = [...customRoles, role];
+      localStorage.setItem('customRoles', JSON.stringify(newRoles));
+      set({ customRoles: newRoles });
+    }
+  },
+
+  deleteCustomRole: (role) => {
+    const newRoles = get().customRoles.filter(r => r !== role);
+    localStorage.setItem('customRoles', JSON.stringify(newRoles));
+    set({ customRoles: newRoles });
+  },
 
   fetchDashboardData: async () => {
     set({ isLoading: true });

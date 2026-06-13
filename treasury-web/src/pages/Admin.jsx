@@ -6,9 +6,10 @@ import { fmtRupiah, fmtTanggal } from '../utils/format';
 const Admin = () => {
   const navigate = useNavigate();
   const { 
-    transactions, budgetItems, members, 
+    transactions, budgetItems, members, customRoles, 
     fetchDashboardData, addTransaction, deleteTransaction, 
-    addBudgetItem, deleteBudgetItem, addMember, deleteMember, setTargetDana 
+    addBudgetItem, deleteBudgetItem, addMember, deleteMember, setTargetDana,
+    addCustomRole, deleteCustomRole
   } = useStore();
 
   const [activeTab, setActiveTab] = useState('transaksi');
@@ -20,7 +21,6 @@ const Admin = () => {
   const [inputKet, setInputKet] = useState('');
   
   // Form Anggaran
-  const [inputAnggaran, setInputAnggaran] = useState('');
   const [budName, setBudName] = useState('');
   const [budCategory, setBudCategory] = useState('Konsumsi');
   const [budUnit, setBudUnit] = useState('');
@@ -29,9 +29,13 @@ const Admin = () => {
 
   // Form Panitia
   const [memName, setMemName] = useState('');
-  const [memRole, setMemRole] = useState('Anggota');
+  const [memRole, setMemRole] = useState('');
   const [memPhone, setMemPhone] = useState('');
   const [memColor, setMemColor] = useState('#6c63ff');
+
+  // Pengaturan
+  const [inputAnggaran, setInputAnggaran] = useState('');
+  const [inputRoleBaru, setInputRoleBaru] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -41,7 +45,6 @@ const Admin = () => {
       fetchDashboardData();
     }
   }, [navigate, fetchDashboardData]);
-
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -83,7 +86,7 @@ const Admin = () => {
     if (!memName) return;
     await addMember({
       name: memName,
-      role: memRole,
+      role: memRole || customRoles[0],
       phone: memPhone,
       avatarColor: memColor,
     });
@@ -95,6 +98,14 @@ const Admin = () => {
     e.preventDefault();
     const val = parseInt(inputAnggaran);
     if (!isNaN(val)) setTargetDana(val);
+  };
+
+  const handleTambahRole = (e) => {
+    e.preventDefault();
+    if (inputRoleBaru.trim()) {
+      addCustomRole(inputRoleBaru.trim());
+      setInputRoleBaru('');
+    }
   };
 
   return (
@@ -248,23 +259,15 @@ const Admin = () => {
                   </div>
                   <div>
                     <label className="block text-sm mb-1 text-muted">Jabatan / Role</label>
-                    <input 
-                      list="role-options" 
+                    <select 
                       className="input-field w-full" 
-                      value={memRole} 
-                      onChange={(e) => setMemRole(e.target.value)} 
-                      placeholder="Pilih atau ketik baru..."
-                      required
-                    />
-                    <datalist id="role-options">
-                      {/* Gabungkan role standar dengan role unik yang sudah ada di data */}
-                      {Array.from(new Set([
-                        'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Anggota',
-                        ...members.map(m => m.role).filter(Boolean)
-                      ])).map(r => (
-                        <option key={r} value={r} />
+                      value={memRole || customRoles[0]} 
+                      onChange={(e) => setMemRole(e.target.value)}
+                    >
+                      {customRoles.map(r => (
+                        <option key={r} value={r}>{r}</option>
                       ))}
-                    </datalist>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm mb-1 text-muted">No. Telepon</label>
@@ -273,7 +276,7 @@ const Admin = () => {
                   <div>
                     <label className="block text-sm mb-1 text-muted">Warna Avatar (Hex)</label>
                     <div className="flex gap-2">
-                      <input type="color" className="w-10 h-10 p-0 border-0 bg-transparent rounded" value={memColor} onChange={(e) => setMemColor(e.target.value)} />
+                      <input type="color" className="w-10 h-10 p-0 border-0 bg-transparent rounded cursor-pointer" value={memColor} onChange={(e) => setMemColor(e.target.value)} />
                       <input type="text" className="input-field flex-1" value={memColor} onChange={(e) => setMemColor(e.target.value)} />
                     </div>
                   </div>
@@ -315,7 +318,7 @@ const Admin = () => {
         {/* Kolom Kanan: Pengaturan Umum */}
         <div className="space-y-6">
           <div className="glass-panel p-6 border-t-2 border-warning">
-            <h2 className="text-xl font-medium mb-4 text-text">Pengaturan Umum</h2>
+            <h2 className="text-xl font-medium mb-4 text-text">Pengaturan Target</h2>
             <form onSubmit={handleSimpanPengaturan} className="space-y-4">
               <div>
                 <label className="block text-sm mb-1 text-muted">Target Dana Total (Rp)</label>
@@ -328,6 +331,45 @@ const Admin = () => {
               </div>
               <button type="submit" className="btn-primary w-full bg-warning hover:bg-warning/80 text-bg-base font-semibold">
                 Simpan Target Dana
+              </button>
+            </form>
+          </div>
+
+          <div className="glass-panel p-6 border-t-2 border-accent-3">
+            <h2 className="text-xl font-medium mb-4 text-text">Kelola Role Panitia</h2>
+            
+            {/* List Role yang ada */}
+            <div className="mb-4 space-y-2">
+              <label className="block text-sm mb-2 text-muted">Daftar Role Aktif</label>
+              <div className="flex flex-wrap gap-2">
+                {customRoles.map(role => (
+                  <div key={role} className="flex items-center gap-1 bg-bg-raised px-3 py-1 rounded-full text-sm">
+                    <span className="text-text">{role}</span>
+                    <button 
+                      onClick={() => deleteCustomRole(role)}
+                      className="ml-2 text-danger hover:text-white hover:bg-danger rounded-full w-4 h-4 flex items-center justify-center transition-colors"
+                      title="Hapus role"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <form onSubmit={handleTambahRole} className="space-y-4 pt-4 border-t border-border">
+              <div>
+                <label className="block text-sm mb-1 text-muted">Tambah Role Baru</label>
+                <input 
+                  type="text" 
+                  className="input-field w-full" 
+                  placeholder="Ketik role baru..."
+                  value={inputRoleBaru}
+                  onChange={(e) => setInputRoleBaru(e.target.value)}
+                />
+              </div>
+              <button type="submit" className="btn-primary w-full bg-accent-3 hover:bg-accent-3/80 font-semibold">
+                Tambah Role
               </button>
             </form>
           </div>
