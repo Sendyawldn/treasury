@@ -45,7 +45,7 @@ const Admin = () => {
       fetchDashboardData();
     }
   }, [navigate, fetchDashboardData]);
- 
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/');
