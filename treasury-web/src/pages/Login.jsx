@@ -15,11 +15,11 @@ const Login = () => {
       navigate('/admin');
     } catch {
       console.warn("Backend auth failed, using mock auth fallback");
-      if (username === 'admin' && password === 'admin') {
-        localStorage.setItem('token', 'dummy-token');
+      if (username === 'admin01' && password === 'cihuy01') {
+        localStorage.setItem('token', 'fallback-token');
         navigate('/admin');
       } else {
-        alert('Invalid credentials (use admin/admin for now)');
+        alert('Kredensial tidak valid (gunakan admin01 / cihuy01 jika backend offline)');
       }
     }
   };
