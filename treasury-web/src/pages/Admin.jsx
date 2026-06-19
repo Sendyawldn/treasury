@@ -8,7 +8,7 @@ const Admin = () => {
   const { 
     transactions, budgetItems, members, customRoles, 
     fetchDashboardData, addTransaction, deleteTransaction, 
-    addBudgetItem, deleteBudgetItem, addMember, deleteMember, setTargetDana,
+    addBudgetItem, deleteBudgetItem, addMember, deleteMember,
     addCustomRole, deleteCustomRole
   } = useStore();
 
@@ -34,7 +34,6 @@ const Admin = () => {
   const [memColor, setMemColor] = useState('#6c63ff');
 
   // Pengaturan
-  const [inputAnggaran, setInputAnggaran] = useState('');
   const [inputRoleBaru, setInputRoleBaru] = useState('');
 
   useEffect(() => {
@@ -94,11 +93,7 @@ const Admin = () => {
     setMemPhone('');
   };
 
-  const handleSimpanPengaturan = (e) => {
-    e.preventDefault();
-    const val = parseInt(inputAnggaran);
-    if (!isNaN(val)) setTargetDana(val);
-  };
+
 
   const handleTambahRole = (e) => {
     e.preventDefault();
@@ -321,23 +316,7 @@ const Admin = () => {
 
         {/* Kolom Kanan: Pengaturan Umum */}
         <div className="space-y-6">
-          <div className="glass-panel p-6 border-t-2 border-warning">
-            <h2 className="text-xl font-medium mb-4 text-text">Pengaturan Target</h2>
-            <form onSubmit={handleSimpanPengaturan} className="space-y-4">
-              <div>
-                <label className="block text-sm mb-1 text-muted">Target Dana Total (Rp)</label>
-                <input 
-                  type="number" 
-                  className="input-field w-full" 
-                  value={inputAnggaran}
-                  onChange={(e) => setInputAnggaran(e.target.value)}
-                />
-              </div>
-              <button type="submit" className="btn-primary w-full bg-warning hover:bg-warning/80 text-bg-base font-semibold">
-                Simpan Target Dana
-              </button>
-            </form>
-          </div>
+
 
           <div className="glass-panel p-6 border-t-2 border-accent-3">
             <h2 className="text-xl font-medium mb-4 text-text">Kelola Role Panitia</h2>

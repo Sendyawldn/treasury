@@ -20,7 +20,7 @@ import {
 const COLORS = ['#6c63ff', '#38bdf8', '#f87171', '#fbbf24', '#a78bfa', '#34d399'];
 
 const Anggaran = () => {
-  const { budgetItems, targetDana, fetchDashboardData, isLoading, transactions } = useStore();
+  const { budgetItems, fetchDashboardData, isLoading, transactions } = useStore();
 
   useEffect(() => {
     fetchDashboardData();
@@ -41,6 +41,7 @@ const Anggaran = () => {
 
   const totalAnggaran = dataGrafik.reduce((sum, item) => sum + item.value, 0);
   const totalTerkumpul = transactions.reduce((s, t) => s + t.terkumpul, 0);
+  const selisihDana = totalTerkumpul - totalAnggaran;
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6 md:space-y-8 animate-in fade-in duration-500">
@@ -68,18 +69,16 @@ const Anggaran = () => {
       ) : (
         <>
           {/* Ringkasan Anggaran */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="glass-panel p-6 border-t-2 border-accent">
               <h3 className="text-muted text-sm tracking-wide">Total Estimasi Anggaran</h3>
               <p className="text-3xl font-medium text-text mt-2">{fmtRupiah(totalAnggaran)}</p>
             </div>
-            <div className="glass-panel p-6 border-t-2 border-warning">
-              <h3 className="text-muted text-sm tracking-wide">Target Pengumpulan Dana</h3>
-              <p className="text-3xl font-medium text-text mt-2">{fmtRupiah(targetDana)}</p>
-            </div>
-            <div className="glass-panel p-6 border-t-2 border-success">
-              <h3 className="text-muted text-sm tracking-wide">Total Dana Terkumpul</h3>
-              <p className="text-3xl font-medium text-text mt-2">{fmtRupiah(totalTerkumpul)}</p>
+            <div className={`glass-panel p-6 border-t-2 ${selisihDana >= 0 ? 'border-success' : 'border-danger'}`}>
+              <h3 className="text-muted text-sm tracking-wide">Selisih (Terkumpul - Estimasi)</h3>
+              <p className={`text-3xl font-medium mt-2 ${selisihDana >= 0 ? 'text-success' : 'text-danger'}`}>
+                {selisihDana >= 0 ? '+' : ''}{fmtRupiah(selisihDana)}
+              </p>
             </div>
           </div>
 

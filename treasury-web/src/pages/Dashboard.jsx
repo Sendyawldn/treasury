@@ -24,7 +24,7 @@ const C = {
 };
 
 const Dashboard = () => {
-  const { transactions, targetDana, fetchDashboardData, isLoading } =
+  const { transactions, fetchDashboardData, isLoading } =
     useStore();
 
   useEffect(() => {
@@ -37,8 +37,7 @@ const Dashboard = () => {
   const rataRata = transactions.length
     ? Math.round(totalTerkumpul / transactions.length)
     : 0;
-  const pct =
-    targetDana > 0 ? Math.min(100, (totalTerkumpul / targetDana) * 100) : 0;
+
 
   // Data for Bar Chart
   const barData = transactions.map((t) => ({
@@ -141,26 +140,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Target Progress */}
-          <div className="glass-panel p-4 md:p-6">
-            <div className="flex flex-col sm:flex-row justify-between sm:items-end mb-2 sm:mb-3 gap-1 sm:gap-0">
-              <h3 className="text-base md:text-lg font-medium text-text">
-                Progress Pencapaian Anggaran
-              </h3>
-              <span className="text-warning font-semibold text-base md:text-lg">
-                {pct.toFixed(1)}%
-              </span>
-            </div>
-            <div className="w-full bg-bg-hover rounded-full h-3 overflow-hidden">
-              <div
-                className="bg-warning h-3 rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${pct}%` }}
-              ></div>
-            </div>
-            <p className="text-xs md:text-sm text-muted mt-2">
-              Target: {fmtRupiah(targetDana)}
-            </p>
-          </div>
+
 
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
