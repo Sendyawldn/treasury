@@ -1,35 +1,36 @@
-import { create } from 'zustand';
-import axios from 'axios';
+import { create } from "zustand";
+import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 const authHeader = () => ({
-  headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
 });
 
-const MOCK_TX = [
-  { id: 1, date: '2026-06-07T00:00:00.000Z', terkumpul: 850000, konsumsi: 0, notes: 'Hari pertama' },
-];
+const MOCK_TX = [];
 
 const useStore = create((set, get) => ({
   transactions: [],
-  budgetItems:  [],
-  members:      [],
-  customRoles:  JSON.parse(localStorage.getItem('customRoles') || '["Ketua", "Wakil Ketua", "Sekretaris", "Bendahara", "Anggota"]'),
-  targetDana:   12790000,
-  isLoading:    false,
+  budgetItems: [],
+  members: [],
+  customRoles: JSON.parse(
+    localStorage.getItem("customRoles") ||
+      '["Ketua", "Wakil Ketua", "Sekretaris", "Bendahara", "Anggota"]',
+  ),
+  targetDana: 0,
+  isLoading: false,
 
   addCustomRole: (role) => {
     const { customRoles } = get();
     if (!customRoles.includes(role)) {
       const newRoles = [...customRoles, role];
-      localStorage.setItem('customRoles', JSON.stringify(newRoles));
+      localStorage.setItem("customRoles", JSON.stringify(newRoles));
       set({ customRoles: newRoles });
     }
   },
 
   deleteCustomRole: (role) => {
-    const newRoles = get().customRoles.filter(r => r !== role);
-    localStorage.setItem('customRoles', JSON.stringify(newRoles));
+    const newRoles = get().customRoles.filter((r) => r !== role);
+    localStorage.setItem("customRoles", JSON.stringify(newRoles));
     set({ customRoles: newRoles });
   },
 
@@ -41,8 +42,14 @@ const useStore = create((set, get) => ({
         axios.get(`${API_URL}/budgets`),
         axios.get(`${API_URL}/members`),
       ]);
-      const sorted = txRes.data.sort((a, b) => new Date(a.date) - new Date(b.date));
-      set({ transactions: sorted, budgetItems: bgRes.data, members: mbRes.data });
+      const sorted = txRes.data.sort(
+        (a, b) => new Date(a.date) - new Date(b.date),
+      );
+      set({
+        transactions: sorted,
+        budgetItems: bgRes.data,
+        members: mbRes.data,
+      });
     } catch {
       set({ transactions: MOCK_TX });
     } finally {
@@ -52,12 +59,20 @@ const useStore = create((set, get) => ({
 
   addTransaction: async (data) => {
     try {
-      const res = await axios.post(`${API_URL}/transactions`, data, authHeader());
-      const sorted = [...get().transactions, res.data].sort((a, b) => new Date(a.date) - new Date(b.date));
+      const res = await axios.post(
+        `${API_URL}/transactions`,
+        data,
+        authHeader(),
+      );
+      const sorted = [...get().transactions, res.data].sort(
+        (a, b) => new Date(a.date) - new Date(b.date),
+      );
       set({ transactions: sorted });
     } catch {
       const mockData = { ...data, id: Date.now() };
-      const sorted = [...get().transactions, mockData].sort((a, b) => new Date(a.date) - new Date(b.date));
+      const sorted = [...get().transactions, mockData].sort(
+        (a, b) => new Date(a.date) - new Date(b.date),
+      );
       set({ transactions: sorted });
     }
   },
@@ -68,7 +83,7 @@ const useStore = create((set, get) => ({
     } catch {
       // Ignore error for mock fallback
     } finally {
-      set({ transactions: get().transactions.filter(t => t.id !== id) });
+      set({ transactions: get().transactions.filter((t) => t.id !== id) });
     }
   },
 
@@ -87,7 +102,7 @@ const useStore = create((set, get) => ({
     } catch {
       // Ignore error for mock fallback
     } finally {
-      set({ budgetItems: get().budgetItems.filter(b => b.id !== id) });
+      set({ budgetItems: get().budgetItems.filter((b) => b.id !== id) });
     }
   },
 
@@ -106,7 +121,7 @@ const useStore = create((set, get) => ({
     } catch {
       // Ignore error for mock fallback
     } finally {
-      set({ members: get().members.filter(m => m.id !== id) });
+      set({ members: get().members.filter((m) => m.id !== id) });
     }
   },
 
