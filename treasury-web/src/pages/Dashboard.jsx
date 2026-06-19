@@ -314,6 +314,9 @@ const Dashboard = () => {
                       Konsumsi
                     </th>
                     <th className="p-3 md:p-4 font-medium whitespace-nowrap">
+                      Keterangan
+                    </th>
+                    <th className="p-3 md:p-4 font-medium whitespace-nowrap">
                       Saldo Hari Ini
                     </th>
                     <th className="p-3 md:p-4 font-medium whitespace-nowrap">
@@ -345,6 +348,9 @@ const Dashboard = () => {
                           <td className="p-3 md:p-4 whitespace-nowrap text-danger font-medium">
                             {fmtRupiah(t.konsumsi)}
                           </td>
+                          <td className="p-3 md:p-4 whitespace-nowrap text-muted max-w-[150px] truncate" title={t.notes || "-"}>
+                            {t.notes || "-"}
+                          </td>
                           <td className="p-3 md:p-4 whitespace-nowrap font-medium">
                             {fmtRupiah(sHariIni)}
                           </td>
@@ -365,7 +371,7 @@ const Dashboard = () => {
                   {transactions.length === 0 && (
                     <tr>
                       <td
-                        colSpan="6"
+                        colSpan="7"
                         className="p-4 md:p-6 text-center text-muted"
                       >
                         Belum ada data riwayat transaksi.
