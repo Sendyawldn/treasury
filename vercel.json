@@ -7,7 +7,7 @@
         },
         "backend": {
             "root": "treasury-api",
-            "routePrefix": "/_/api",
+            "routePrefix": "/api",
             "builder": "@vercel/node",
             "entrypoint": "index.js"
         }
