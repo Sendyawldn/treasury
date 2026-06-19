@@ -69,7 +69,13 @@ const Dashboard = () => {
             Dana 17 Agustusan 2026
           </p>
         </div>
-        <div className="flex gap-2 md:gap-3 justify-center items-center">
+        <div className="flex gap-2 md:gap-3 justify-center items-center flex-wrap">
+          <Link
+            to="/anggaran"
+            className="btn-primary bg-bg-raised text-text border border-border-md hover:bg-bg-hover text-sm md:text-base px-3 py-2 md:px-4 md:py-2"
+          >
+            Rincian Anggaran
+          </Link>
           <Link
             to="/panitia"
             className="btn-primary bg-bg-raised text-text border border-border-md hover:bg-bg-hover text-sm md:text-base px-3 py-2 md:px-4 md:py-2"

@@ -202,7 +202,11 @@ const Admin = () => {
                   <div>
                     <label className="block text-sm mb-1 text-muted">Kategori</label>
                     <select className="input-field w-full" value={budCategory} onChange={(e) => setBudCategory(e.target.value)}>
-                      <option>Konsumsi</option><option>Dekorasi</option><option>Lomba</option><option>Panggung</option><option>Lain-lain</option>
+                      <option value="Konsumsi">Konsumsi</option>
+                      <option value="Perlengkapan dan Dekorasi">Perlengkapan dan Dekorasi</option>
+                      <option value="Perlombaan dan Hadiah">Perlombaan dan Hadiah</option>
+                      <option value="Panggung dan Hiburan">Panggung dan Hiburan</option>
+                      <option value="Lain-lain">Lain-lain</option>
                     </select>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
