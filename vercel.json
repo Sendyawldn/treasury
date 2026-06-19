@@ -1,0 +1,15 @@
+{
+    "experimentalServices": {
+        "frontend": {
+            "root": "treasury-web",
+            "routePrefix": "/",
+            "framework": "vite"
+        },
+        "backend": {
+            "root": "treasury-api",
+            "routePrefix": "/_/api",
+            "builder": "@vercel/node",
+            "entrypoint": "index.js"
+        }
+    }
+}
