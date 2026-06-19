@@ -63,6 +63,9 @@ const Admin = () => {
     setInputTer('');
     setInputKon('');
     setInputKet('');
+    // Refresh data dan navigasi ke Dashboard agar user langsung melihat hasilnya
+    await fetchDashboardData();
+    navigate('/');
   };
 
   const handleTambahAnggaran = async (e) => {
