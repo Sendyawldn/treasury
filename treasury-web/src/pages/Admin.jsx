@@ -63,9 +63,8 @@ const Admin = () => {
     setInputTer('');
     setInputKon('');
     setInputKet('');
-    // Refresh data dan navigasi ke Dashboard agar user langsung melihat hasilnya
+    // Refresh data agar transaksi baru muncul di tabel
     await fetchDashboardData();
-    navigate('/');
   };
 
   const handleTambahAnggaran = async (e) => {
