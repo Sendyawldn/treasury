@@ -24,8 +24,7 @@ const C = {
 };
 
 const Dashboard = () => {
-  const { transactions, fetchDashboardData, isLoading } =
-    useStore();
+  const { transactions, fetchDashboardData, isLoading } = useStore();
 
   useEffect(() => {
     fetchDashboardData();
@@ -37,7 +36,6 @@ const Dashboard = () => {
   const rataRata = transactions.length
     ? Math.round(totalTerkumpul / transactions.length)
     : 0;
-
 
   // Data for Bar Chart
   const barData = transactions.map((t) => ({
@@ -75,12 +73,14 @@ const Dashboard = () => {
           >
             Rincian Anggaran
           </Link>
-          <Link
-            to="/panitia"
+          <a
+            href="https://panitia-01.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="btn-primary bg-bg-raised text-text border border-border-md hover:bg-bg-hover text-sm md:text-base px-3 py-2 md:px-4 md:py-2"
           >
-            Struktur Panitia
-          </Link>
+            Halaman Panitia
+          </a>
           <Link
             to="/login"
             className="text-muted hover:text-accent p-2 rounded-lg transition-colors"
@@ -139,8 +139,6 @@ const Dashboard = () => {
               </p>
             </div>
           </div>
-
-
 
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
@@ -328,7 +326,10 @@ const Dashboard = () => {
                           <td className="p-3 md:p-4 whitespace-nowrap text-danger font-medium">
                             {fmtRupiah(t.konsumsi)}
                           </td>
-                          <td className="p-3 md:p-4 whitespace-nowrap text-muted max-w-[150px] truncate" title={t.notes || "-"}>
+                          <td
+                            className="p-3 md:p-4 whitespace-nowrap text-muted max-w-[150px] truncate"
+                            title={t.notes || "-"}
+                          >
                             {t.notes || "-"}
                           </td>
                           <td className="p-3 md:p-4 whitespace-nowrap font-medium">
