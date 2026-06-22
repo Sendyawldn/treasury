@@ -21,6 +21,7 @@ const Admin = () => {
   
   // Form Anggaran
   const [budName, setBudName] = useState('');
+  const [budDate, setBudDate] = useState(new Date().toISOString().split('T')[0]);
   const [budCategory, setBudCategory] = useState('Konsumsi');
   const [budUnit, setBudUnit] = useState('');
   const [budVolume, setBudVolume] = useState('');
@@ -58,8 +59,9 @@ const Admin = () => {
 
   const handleTambahAnggaran = async (e) => {
     e.preventDefault();
-    if (!budName) return;
+    if (!budName || !budDate) return;
     await addBudgetItem({
+      date: new Date(budDate).toISOString(),
       name: budName,
       category: budCategory,
       unit: budUnit,
@@ -162,6 +164,10 @@ const Admin = () => {
                 <h2 className="text-xl font-medium mb-4 text-text">Input Item Anggaran</h2>
                 <form onSubmit={handleTambahAnggaran} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
+                    <label className="block text-sm mb-1 text-muted">Tanggal</label>
+                    <input type="date" className="input-field w-full" value={budDate} onChange={(e) => setBudDate(e.target.value)} required />
+                  </div>
+                  <div>
                     <label className="block text-sm mb-1 text-muted">Nama Barang/Keperluan</label>
                     <input type="text" className="input-field w-full" value={budName} onChange={(e) => setBudName(e.target.value)} required />
                   </div>
@@ -201,13 +207,13 @@ const Admin = () => {
                   <table className="w-full text-left border-collapse">
                     <thead className="sticky top-0 bg-bg-surface z-10">
                       <tr className="border-b border-border text-muted">
-                        <th className="p-4 font-medium">Nama</th><th className="p-4 font-medium">Kategori</th><th className="p-4 font-medium">Vol</th><th className="p-4 font-medium">Harga/Satuan</th><th className="p-4 font-medium">Aksi</th>
+                        <th className="p-4 font-medium">Tanggal</th><th className="p-4 font-medium">Nama</th><th className="p-4 font-medium">Kategori</th><th className="p-4 font-medium">Vol</th><th className="p-4 font-medium">Harga/Satuan</th><th className="p-4 font-medium">Aksi</th>
                       </tr>
                     </thead>
                     <tbody className="text-text divide-y divide-border">
                       {budgetItems.map(b => (
                         <tr key={b.id} className="hover:bg-bg-hover">
-                          <td className="p-4">{b.name}</td><td className="p-4 text-muted">{b.category}</td><td className="p-4">{b.volume} {b.unit}</td><td className="p-4 text-accent">{fmtRupiah(b.price)}</td>
+                          <td className="p-4 text-muted">{b.date ? fmtTanggal(b.date) : '-'}</td><td className="p-4">{b.name}</td><td className="p-4 text-muted">{b.category}</td><td className="p-4">{b.volume} {b.unit}</td><td className="p-4 text-accent">{fmtRupiah(b.price)}</td>
                           <td className="p-4"><button onClick={() => deleteBudgetItem(b.id)} className="text-xs bg-bg-raised text-danger px-2 py-1 rounded hover:bg-danger/20">Hapus</button></td>
                         </tr>
                       ))}
