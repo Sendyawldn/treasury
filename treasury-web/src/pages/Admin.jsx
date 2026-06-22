@@ -6,10 +6,9 @@ import { fmtRupiah, fmtTanggal } from '../utils/format';
 const Admin = () => {
   const navigate = useNavigate();
   const { 
-    transactions, budgetItems, members, customRoles, 
+    transactions, budgetItems, 
     fetchDashboardData, addTransaction, deleteTransaction, 
-    addBudgetItem, deleteBudgetItem, addMember, deleteMember,
-    addCustomRole, deleteCustomRole
+    addBudgetItem, deleteBudgetItem
   } = useStore();
 
   const [activeTab, setActiveTab] = useState('transaksi');
@@ -27,14 +26,7 @@ const Admin = () => {
   const [budVolume, setBudVolume] = useState('');
   const [budPrice, setBudPrice] = useState('');
 
-  // Form Panitia
-  const [memName, setMemName] = useState('');
-  const [memRole, setMemRole] = useState('');
-  const [memPhone, setMemPhone] = useState('');
-  const [memColor, setMemColor] = useState('#6c63ff');
 
-  // Pengaturan
-  const [inputRoleBaru, setInputRoleBaru] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -80,28 +72,7 @@ const Admin = () => {
     setBudPrice('');
   };
 
-  const handleTambahPanitia = async (e) => {
-    e.preventDefault();
-    if (!memName) return;
-    await addMember({
-      name: memName,
-      role: memRole || customRoles[0],
-      phone: memPhone,
-      avatarColor: memColor,
-    });
-    setMemName('');
-    setMemPhone('');
-  };
 
-
-
-  const handleTambahRole = (e) => {
-    e.preventDefault();
-    if (inputRoleBaru.trim()) {
-      addCustomRole(inputRoleBaru.trim());
-      setInputRoleBaru('');
-    }
-  };
 
   return (
     <div className="p-6 max-w-7xl mx-auto animate-in fade-in duration-500">
@@ -119,7 +90,7 @@ const Admin = () => {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 border-b border-border">
-        {['transaksi', 'anggaran', 'panitia'].map(tab => (
+        {['transaksi', 'anggaran'].map(tab => (
           <button 
             key={tab} 
             onClick={() => setActiveTab(tab)}
@@ -130,10 +101,10 @@ const Admin = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         
         {/* Konten Utama Kiri */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6">
           
           {activeTab === 'transaksi' && (
             <>
@@ -247,115 +218,6 @@ const Admin = () => {
             </>
           )}
 
-          {activeTab === 'panitia' && (
-            <>
-              <div className="glass-panel p-6 border-t-2 border-success">
-                <h2 className="text-xl font-medium mb-4 text-text">Tambah Panitia</h2>
-                <form onSubmit={handleTambahPanitia} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm mb-1 text-muted">Nama Anggota</label>
-                    <input type="text" className="input-field w-full" value={memName} onChange={(e) => setMemName(e.target.value)} required />
-                  </div>
-                  <div>
-                    <label className="block text-sm mb-1 text-muted">Jabatan / Role</label>
-                    <select 
-                      className="input-field w-full" 
-                      value={memRole || customRoles[0]} 
-                      onChange={(e) => setMemRole(e.target.value)}
-                    >
-                      {customRoles.map(r => (
-                        <option key={r} value={r}>{r}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm mb-1 text-muted">No. Telepon</label>
-                    <input type="text" className="input-field w-full" value={memPhone} onChange={(e) => setMemPhone(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="block text-sm mb-1 text-muted">Warna Avatar (Hex)</label>
-                    <div className="flex gap-2">
-                      <input type="color" className="w-10 h-10 p-0 border-0 bg-transparent rounded cursor-pointer" value={memColor} onChange={(e) => setMemColor(e.target.value)} />
-                      <input type="text" className="input-field flex-1" value={memColor} onChange={(e) => setMemColor(e.target.value)} />
-                    </div>
-                  </div>
-                  <div className="md:col-span-2 mt-2">
-                    <button type="submit" className="btn-primary w-full bg-success hover:bg-success/80">Simpan Panitia</button>
-                  </div>
-                </form>
-              </div>
-
-              <div className="glass-panel p-0 overflow-hidden border-t-2 border-border-md">
-                <div className="p-6 border-b border-border"><h2 className="text-xl font-medium text-text">Daftar Panitia</h2></div>
-                <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead className="sticky top-0 bg-bg-surface z-10">
-                      <tr className="border-b border-border text-muted">
-                        <th className="p-4 font-medium">Panitia</th><th className="p-4 font-medium">Role</th><th className="p-4 font-medium">Telepon</th><th className="p-4 font-medium">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-text divide-y divide-border">
-                      {members.map(m => (
-                        <tr key={m.id} className="hover:bg-bg-hover">
-                          <td className="p-4 flex items-center gap-3">
-                            <span className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white shadow-sm" style={{ backgroundColor: m.avatarColor || '#ccc' }}>{m.name.charAt(0)}</span>
-                            {m.name}
-                          </td>
-                          <td className="p-4 text-muted">{m.role}</td><td className="p-4 text-muted">{m.phone||'-'}</td>
-                          <td className="p-4"><button onClick={() => deleteMember(m.id)} className="text-xs bg-bg-raised text-danger px-2 py-1 rounded hover:bg-danger/20">Hapus</button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </>
-          )}
-
-        </div>
-
-        {/* Kolom Kanan: Pengaturan Umum */}
-        <div className="space-y-6">
-
-
-          <div className="glass-panel p-6 border-t-2 border-accent-3">
-            <h2 className="text-xl font-medium mb-4 text-text">Kelola Role Panitia</h2>
-            
-            {/* List Role yang ada */}
-            <div className="mb-4 space-y-2">
-              <label className="block text-sm mb-2 text-muted">Daftar Role Aktif</label>
-              <div className="flex flex-wrap gap-2">
-                {customRoles.map(role => (
-                  <div key={role} className="flex items-center gap-1 bg-bg-raised px-3 py-1 rounded-full text-sm">
-                    <span className="text-text">{role}</span>
-                    <button 
-                      onClick={() => deleteCustomRole(role)}
-                      className="ml-2 text-danger hover:text-white hover:bg-danger rounded-full w-4 h-4 flex items-center justify-center transition-colors"
-                      title="Hapus role"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <form onSubmit={handleTambahRole} className="space-y-4 pt-4 border-t border-border">
-              <div>
-                <label className="block text-sm mb-1 text-muted">Tambah Role Baru</label>
-                <input 
-                  type="text" 
-                  className="input-field w-full" 
-                  placeholder="Ketik role baru..."
-                  value={inputRoleBaru}
-                  onChange={(e) => setInputRoleBaru(e.target.value)}
-                />
-              </div>
-              <button type="submit" className="btn-primary w-full bg-accent-3 hover:bg-accent-3/80 font-semibold">
-                Tambah Role
-              </button>
-            </form>
-          </div>
         </div>
       </div>
     </div>
