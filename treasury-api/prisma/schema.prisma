@@ -25,10 +25,11 @@ model Transaction {
 }
 
 model BudgetItem {
-  id       Int    @id @default(autoincrement())
+  id       Int      @id @default(autoincrement())
+  date     DateTime @default(now())
   name     String
-  category String // "Konsumsi", "Dekorasi", dll
+  category String   // "Konsumsi", "Dekorasi", dll
   unit     String
   volume   Int
-  price    Int    // Harga satuan
+  price    Int      // Harga satuan
 }

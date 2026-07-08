@@ -11,9 +11,9 @@ export const getAllBudgetItems = async (req, res) => {
 
 export const createBudgetItem = async (req, res) => {
   try {
-    const { name, category, unit, volume, price } = req.body;
+    const { name, category, unit, volume, price, date } = req.body;
     const budgetItem = await prisma.budgetItem.create({
-      data: { name, category, unit, volume, price },
+      data: { name, category, unit, volume, price, date },
     });
     res.status(201).json(budgetItem);
   } catch (error) {

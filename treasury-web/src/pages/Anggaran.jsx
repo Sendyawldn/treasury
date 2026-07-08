@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import useStore from '../store/useStore';
-import { fmtRupiah } from '../utils/format';
+import { fmtRupiah, fmtTanggal } from '../utils/format';
 import {
   PieChart,
   Pie,
@@ -170,6 +170,7 @@ const Anggaran = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-bg-hover text-muted text-sm">
+                    <th className="p-4 font-medium whitespace-nowrap">Tanggal</th>
                     <th className="p-4 font-medium whitespace-nowrap">Nama Barang / Kebutuhan</th>
                     <th className="p-4 font-medium whitespace-nowrap">Kategori</th>
                     <th className="p-4 font-medium whitespace-nowrap">Volume</th>
@@ -180,6 +181,7 @@ const Anggaran = () => {
                 <tbody className="text-text divide-y divide-border text-sm">
                   {budgetItems.map((b) => (
                     <tr key={b.id} className="hover:bg-bg-raised transition-colors">
+                      <td className="p-4 text-muted">{b.date ? fmtTanggal(b.date) : '-'}</td>
                       <td className="p-4 font-medium">{b.name}</td>
                       <td className="p-4 text-muted">
                         <span className="bg-bg-hover px-2 py-1 rounded text-xs">{b.category}</span>
@@ -191,7 +193,7 @@ const Anggaran = () => {
                   ))}
                   {budgetItems.length === 0 && (
                     <tr>
-                      <td colSpan="5" className="p-6 text-center text-muted">
+                      <td colSpan="6" className="p-6 text-center text-muted">
                         Belum ada item anggaran yang ditambahkan.
                       </td>
                     </tr>
