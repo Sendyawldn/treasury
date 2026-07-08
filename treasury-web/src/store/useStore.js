@@ -42,12 +42,15 @@ const useStore = create((set, get) => ({
         axios.get(`${API_URL}/budgets`),
         axios.get(`${API_URL}/members`),
       ]);
-      const sorted = txRes.data.sort(
+      const sortedTx = txRes.data.sort(
+        (a, b) => new Date(a.date) - new Date(b.date),
+      );
+      const sortedBg = bgRes.data.sort(
         (a, b) => new Date(a.date) - new Date(b.date),
       );
       set({
-        transactions: sorted,
-        budgetItems: bgRes.data,
+        transactions: sortedTx,
+        budgetItems: sortedBg,
         members: mbRes.data,
       });
     } catch {
@@ -107,18 +110,31 @@ const useStore = create((set, get) => ({
   addBudgetItem: async (data) => {
     try {
       const res = await axios.post(`${API_URL}/budgets`, data, authHeader());
-      set({ budgetItems: [...get().budgetItems, res.data] });
+      const sortedBg = [...get().budgetItems, res.data].sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      );
+      set({ budgetItems: sortedBg });
     } catch {
-      set({ budgetItems: [...get().budgetItems, { ...data, id: Date.now() }] });
+      const mockData = { ...data, id: Date.now() };
+      const sortedBg = [...get().budgetItems, mockData].sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      );
+      set({ budgetItems: sortedBg });
     }
   },
 
   editBudgetItem: async (id, data) => {
     try {
       const res = await axios.put(`${API_URL}/budgets/${id}`, data, authHeader());
-      set({ budgetItems: get().budgetItems.map(b => b.id === id ? res.data : b) });
+      const sortedBg = get().budgetItems.map(b => b.id === id ? res.data : b).sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      );
+      set({ budgetItems: sortedBg });
     } catch {
-      set({ budgetItems: get().budgetItems.map(b => b.id === id ? { ...b, ...data } : b) });
+      const sortedBg = get().budgetItems.map(b => b.id === id ? { ...b, ...data } : b).sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      );
+      set({ budgetItems: sortedBg });
     }
   },
 
