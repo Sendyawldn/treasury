@@ -87,12 +87,38 @@ const useStore = create((set, get) => ({
     }
   },
 
+  editTransaction: async (id, data) => {
+    try {
+      const res = await axios.put(`${API_URL}/transactions/${id}`, data, authHeader());
+      set({
+        transactions: get().transactions.map(t => t.id === id ? res.data : t).sort(
+          (a, b) => new Date(a.date) - new Date(b.date)
+        )
+      });
+    } catch {
+      set({
+        transactions: get().transactions.map(t => t.id === id ? { ...t, ...data } : t).sort(
+          (a, b) => new Date(a.date) - new Date(b.date)
+        )
+      });
+    }
+  },
+
   addBudgetItem: async (data) => {
     try {
       const res = await axios.post(`${API_URL}/budgets`, data, authHeader());
       set({ budgetItems: [...get().budgetItems, res.data] });
     } catch {
       set({ budgetItems: [...get().budgetItems, { ...data, id: Date.now() }] });
+    }
+  },
+
+  editBudgetItem: async (id, data) => {
+    try {
+      const res = await axios.put(`${API_URL}/budgets/${id}`, data, authHeader());
+      set({ budgetItems: get().budgetItems.map(b => b.id === id ? res.data : b) });
+    } catch {
+      set({ budgetItems: get().budgetItems.map(b => b.id === id ? { ...b, ...data } : b) });
     }
   },
 

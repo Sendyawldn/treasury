@@ -7,11 +7,15 @@ const Admin = () => {
   const navigate = useNavigate();
   const { 
     transactions, budgetItems, 
-    fetchDashboardData, addTransaction, deleteTransaction, 
-    addBudgetItem, deleteBudgetItem
+    fetchDashboardData, addTransaction, deleteTransaction, editTransaction,
+    addBudgetItem, deleteBudgetItem, editBudgetItem
   } = useStore();
 
   const [activeTab, setActiveTab] = useState('transaksi');
+
+  // State Edit
+  const [editTxId, setEditTxId] = useState(null);
+  const [editBudgetId, setEditBudgetId] = useState(null);
 
   // Form Transaksi
   const [inputTgl, setInputTgl] = useState(new Date().toISOString().split('T')[0]);
@@ -43,37 +47,76 @@ const Admin = () => {
     navigate('/');
   };
 
-  const handleTambahTransaksi = async (e) => {
-    e.preventDefault();
-    if (!inputTgl) return;
-    await addTransaction({
-      date: new Date(inputTgl).toISOString(),
-      terkumpul: parseInt(inputTer) || 0,
-      konsumsi: parseInt(inputKon) || 0,
-      notes: inputKet,
-    });
+  const resetTxForm = () => {
+    setEditTxId(null);
+    setInputTgl(new Date().toISOString().split('T')[0]);
     setInputTer('');
     setInputKon('');
     setInputKet('');
   };
 
+  const handleTambahTransaksi = async (e) => {
+    e.preventDefault();
+    if (!inputTgl) return;
+    const data = {
+      date: new Date(inputTgl).toISOString(),
+      terkumpul: parseInt(inputTer) || 0,
+      konsumsi: parseInt(inputKon) || 0,
+      notes: inputKet,
+    };
+    if (editTxId) {
+      await editTransaction(editTxId, data);
+    } else {
+      await addTransaction(data);
+    }
+    resetTxForm();
+  };
+
+  const handleEditTxClick = (t) => {
+    setEditTxId(t.id);
+    setInputTgl(new Date(t.date).toISOString().split('T')[0]);
+    setInputTer(t.terkumpul || '');
+    setInputKon(t.konsumsi || '');
+    setInputKet(t.notes || '');
+  };
+
+  const resetBudForm = () => {
+    setEditBudgetId(null);
+    setBudName('');
+    setBudDate(new Date().toISOString().split('T')[0]);
+    setBudUnit('');
+    setBudVolume('');
+    setBudPrice('');
+  };
+
   const handleTambahAnggaran = async (e) => {
     e.preventDefault();
     if (!budName || !budDate) return;
-    await addBudgetItem({
+    const data = {
       date: new Date(budDate).toISOString(),
       name: budName,
       category: budCategory,
       unit: budUnit,
       volume: parseInt(budVolume) || 1,
       price: parseInt(budPrice) || 0,
-    });
-    setBudName('');
-    setBudUnit('');
-    setBudVolume('');
-    setBudPrice('');
+    };
+    if (editBudgetId) {
+      await editBudgetItem(editBudgetId, data);
+    } else {
+      await addBudgetItem(data);
+    }
+    resetBudForm();
   };
 
+  const handleEditBudClick = (b) => {
+    setEditBudgetId(b.id);
+    setBudDate(b.date ? new Date(b.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
+    setBudName(b.name || '');
+    setBudCategory(b.category || 'Konsumsi');
+    setBudUnit(b.unit || '');
+    setBudVolume(b.volume || '');
+    setBudPrice(b.price || '');
+  };
 
 
   return (
@@ -111,7 +154,7 @@ const Admin = () => {
           {activeTab === 'transaksi' && (
             <>
               <div className="glass-panel p-6 border-t-2 border-accent">
-                <h2 className="text-xl font-medium mb-4 text-text">Input Transaksi Baru</h2>
+                <h2 className="text-xl font-medium mb-4 text-text">{editTxId ? 'Edit Transaksi' : 'Input Transaksi Baru'}</h2>
                 <form onSubmit={handleTambahTransaksi} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm mb-1 text-muted">Tanggal</label>
@@ -129,8 +172,11 @@ const Admin = () => {
                     <label className="block text-sm mb-1 text-muted">Keterangan</label>
                     <input type="text" className="input-field w-full" placeholder="Catatan..." value={inputKet} onChange={(e) => setInputKet(e.target.value)} />
                   </div>
-                  <div className="md:col-span-2 mt-2">
-                    <button type="submit" className="btn-primary w-full">Simpan Transaksi</button>
+                  <div className="md:col-span-2 mt-2 flex gap-2">
+                    <button type="submit" className="btn-primary flex-1">{editTxId ? 'Update Transaksi' : 'Simpan Transaksi'}</button>
+                    {editTxId && (
+                      <button type="button" onClick={resetTxForm} className="px-4 py-2 bg-bg-raised text-muted hover:text-white rounded-lg transition-colors border border-border">Batal</button>
+                    )}
                   </div>
                 </form>
               </div>
@@ -148,7 +194,10 @@ const Admin = () => {
                       {transactions.map(t => (
                         <tr key={t.id} className="hover:bg-bg-hover">
                           <td className="p-4">{fmtTanggal(t.date)}</td><td className="p-4 text-accent">{fmtRupiah(t.terkumpul)}</td><td className="p-4 text-danger">{fmtRupiah(t.konsumsi)}</td><td className="p-4 text-muted max-w-[150px] truncate">{t.notes||'-'}</td>
-                          <td className="p-4"><button onClick={() => deleteTransaction(t.id)} className="text-xs bg-bg-raised text-danger px-2 py-1 rounded hover:bg-danger/20">Hapus</button></td>
+                          <td className="p-4 flex gap-2">
+                            <button onClick={() => handleEditTxClick(t)} className="text-xs bg-bg-raised text-accent px-2 py-1 rounded hover:bg-accent/20">Edit</button>
+                            <button onClick={() => deleteTransaction(t.id)} className="text-xs bg-bg-raised text-danger px-2 py-1 rounded hover:bg-danger/20">Hapus</button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -161,7 +210,7 @@ const Admin = () => {
           {activeTab === 'anggaran' && (
             <>
               <div className="glass-panel p-6 border-t-2 border-info">
-                <h2 className="text-xl font-medium mb-4 text-text">Input Item Anggaran</h2>
+                <h2 className="text-xl font-medium mb-4 text-text">{editBudgetId ? 'Edit Item Anggaran' : 'Input Item Anggaran'}</h2>
                 <form onSubmit={handleTambahAnggaran} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm mb-1 text-muted">Tanggal</label>
@@ -195,8 +244,11 @@ const Admin = () => {
                     <label className="block text-sm mb-1 text-muted">Harga Satuan (Rp)</label>
                     <input type="number" className="input-field w-full" value={budPrice} onChange={(e) => setBudPrice(e.target.value)} />
                   </div>
-                  <div className="md:col-span-2 mt-2">
-                    <button type="submit" className="btn-primary w-full bg-info hover:bg-info/80">Simpan Item Anggaran</button>
+                  <div className="md:col-span-2 mt-2 flex gap-2">
+                    <button type="submit" className="btn-primary flex-1 bg-info hover:bg-info/80">{editBudgetId ? 'Update Item Anggaran' : 'Simpan Item Anggaran'}</button>
+                    {editBudgetId && (
+                      <button type="button" onClick={resetBudForm} className="px-4 py-2 bg-bg-raised text-muted hover:text-white rounded-lg transition-colors border border-border">Batal</button>
+                    )}
                   </div>
                 </form>
               </div>
@@ -214,7 +266,10 @@ const Admin = () => {
                       {budgetItems.map(b => (
                         <tr key={b.id} className="hover:bg-bg-hover">
                           <td className="p-4 text-muted">{b.date ? fmtTanggal(b.date) : '-'}</td><td className="p-4">{b.name}</td><td className="p-4 text-muted">{b.category}</td><td className="p-4">{b.volume} {b.unit}</td><td className="p-4 text-accent">{fmtRupiah(b.price)}</td>
-                          <td className="p-4"><button onClick={() => deleteBudgetItem(b.id)} className="text-xs bg-bg-raised text-danger px-2 py-1 rounded hover:bg-danger/20">Hapus</button></td>
+                          <td className="p-4 flex gap-2">
+                            <button onClick={() => handleEditBudClick(b)} className="text-xs bg-bg-raised text-accent px-2 py-1 rounded hover:bg-accent/20">Edit</button>
+                            <button onClick={() => deleteBudgetItem(b.id)} className="text-xs bg-bg-raised text-danger px-2 py-1 rounded hover:bg-danger/20">Hapus</button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>

@@ -21,6 +21,20 @@ export const createTransaction = async (req, res) => {
   }
 };
 
+export const updateTransaction = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { date, terkumpul, konsumsi, notes } = req.body;
+    const transaction = await prisma.transaction.update({
+      where: { id: Number(id) },
+      data: { date: new Date(date), terkumpul, konsumsi, notes },
+    });
+    res.json(transaction);
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+};
+
 export const deleteTransaction = async (req, res) => {
   try {
     const { id } = req.params;

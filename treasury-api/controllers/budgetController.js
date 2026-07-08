@@ -21,6 +21,20 @@ export const createBudgetItem = async (req, res) => {
   }
 };
 
+export const updateBudgetItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, category, unit, volume, price, date } = req.body;
+    const budgetItem = await prisma.budgetItem.update({
+      where: { id: Number(id) },
+      data: { name, category, unit, volume, price, date: date ? new Date(date) : undefined },
+    });
+    res.json(budgetItem);
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+};
+
 export const deleteBudgetItem = async (req, res) => {
   try {
     const { id } = req.params;
